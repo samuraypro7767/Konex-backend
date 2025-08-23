@@ -50,7 +50,7 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
 		</dependency>
-		<!-- Soporte específico Oracle para Flyway 10+ (si da conflicto, puedes quitarlo) -->
+		<!-- Soporte Oracle para Flyway 10+ (si diera conflicto, puedes quitar esta línea) -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-oracle</artifactId>
@@ -67,6 +67,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.34</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -80,7 +81,28 @@
 
 	<build>
 		<plugins>
-			<!-- Compilación con Java 17 -->
+			<!-- Obliga a usar JDK 17 (evita compilar con JDK 24 u otro) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce-java</id>
+						<goals><goal>enforce</goal></goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[17,18)</version>
+								</requireJavaVersion>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Compilación con Java 17 + annotation processing de Lombok -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
