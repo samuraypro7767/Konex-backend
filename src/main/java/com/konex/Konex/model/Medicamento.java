@@ -22,6 +22,8 @@ public class Medicamento {
     @Column(name = "ID_MEDICAMENTO", nullable = false)
     private Long id;
 
+
+
     @Column(name = "NOMBRE", nullable = false, length = 160)
     private String nombre;
 
@@ -42,4 +44,7 @@ public class Medicamento {
 
     @Column(name = "VALOR_UNITARIO", nullable = false, precision = 14, scale = 2)
     private BigDecimal valorUnitario;
+
+    @Column(name = "ACTIVO", nullable = false)
+    private Integer activo = 1;
 }

@@ -24,6 +24,12 @@ public class VentaController {
     public VentaResponse crear(@Valid @RequestBody VentaCreateRequest req) {
         return service.crearVenta(req);
     }
+    // Listar todas las ventas
+    @GetMapping("/all")
+    public List<VentaResponse> listarTodas() {
+        return service.listarTodas();
+    }
+
 
     // Obtener venta por id
     @GetMapping("/{id}")

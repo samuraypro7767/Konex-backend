@@ -4,7 +4,6 @@ import com.konex.Konex.dto.VentaCreateRequest;
 import com.konex.Konex.dto.VentaResponse;
 import com.konex.Konex.exception.BusinessException;
 import com.konex.Konex.exception.NotFoundException;
-import com.konex.Konex.model.DetalleVenta;
 import com.konex.Konex.model.Medicamento;
 import com.konex.Konex.model.Venta;
 import com.konex.Konex.repository.MedicamentoRepository;
@@ -48,7 +47,6 @@ class VentaServiceImplTest {
         when(ventaRepository.save(any(Venta.class))).thenAnswer(inv -> {
             Venta v = inv.getArgument(0);
             v.setId(100L);
-            // simular que JPA setea backrefs correctamente (ya viene armado en service)
             return v;
         });
 
@@ -112,5 +110,28 @@ class VentaServiceImplTest {
         List<VentaResponse> list = service.listarPorRango(LocalDate.now().minusDays(1), LocalDate.now());
         assertThat(list).hasSize(1);
         assertThat(list.get(0).getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void listarTodas_ok() {
+        Venta v1 = new Venta();
+        v1.setId(1L);
+        v1.setFechaHora(LocalDateTime.now());
+        v1.setValorTotal(new BigDecimal("1000"));
+
+        Venta v2 = new Venta();
+        v2.setId(2L);
+        v2.setFechaHora(LocalDateTime.now());
+        v2.setValorTotal(new BigDecimal("2000"));
+
+        when(ventaRepository.findAll()).thenReturn(List.of(v1, v2));
+
+        List<VentaResponse> result = service.listarTodas();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getId()).isEqualTo(1L);
+        assertThat(result.get(1).getId()).isEqualTo(2L);
+
+        verify(ventaRepository, times(1)).findAll();
     }
 }

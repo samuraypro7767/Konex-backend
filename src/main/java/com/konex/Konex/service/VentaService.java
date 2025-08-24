@@ -13,4 +13,7 @@ public interface VentaService {
     VentaResponse obtenerVenta(Long id);
 
     List<VentaResponse> listarPorRango(LocalDate desde, LocalDate hasta);
+
+    List<VentaResponse> listarTodas();
+
 }

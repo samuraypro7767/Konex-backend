@@ -33,15 +33,19 @@ public class MedicamentoController {
 
     // Eliminar
     @DeleteMapping("/{id}")
+    // Obtener por id
     public void eliminar(@PathVariable Long id) {
         service.eliminar(id);
     }
 
-    // Obtener por id
     @GetMapping("/{id}")
     public MedicamentoResponse obtener(@PathVariable Long id) {
         return service.obtener(id);
     }
+
+    @PatchMapping("/{id}/inactivar")
+    public void inactivar(@PathVariable Long id) { service.eliminar(id); }
+
 
     // Listar paginado + filtro por nombre
     @GetMapping

@@ -67,6 +67,14 @@ public class VentaServiceImpl implements VentaService {
         venta = ventaRepository.save(venta);
         return VentaMapper.toResponse(venta);
     }
+    @Transactional(readOnly = true)
+    @Override
+    public List<VentaResponse> listarTodas() {
+        return ventaRepository.findAll().stream()
+                .map(VentaMapper::toResponse)
+                .toList();
+    }
+
 
     @Transactional(readOnly = true)
     @Override

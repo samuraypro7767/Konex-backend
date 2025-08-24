@@ -80,4 +80,18 @@ class VentaControllerTest {
         mvc.perform(get("/api/ventas?desde=2025-08-01&hasta=2025-08-31"))
                 .andExpect(status().isOk());
     }
+
+    // 🔥 Nuevo test: endpoint /api/ventas/all
+    @Test
+    void listarTodas_ok() throws Exception {
+        VentaResponse r1 = VentaResponse.builder().id(1L).valorTotal(new BigDecimal("1000")).build();
+        VentaResponse r2 = VentaResponse.builder().id(2L).valorTotal(new BigDecimal("2000")).build();
+
+        Mockito.when(service.listarTodas()).thenReturn(List.of(r1, r2));
+
+        mvc.perform(get("/api/ventas/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2));
+    }
 }

@@ -13,8 +13,11 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
      * Si 'nombre' es null, trae todos.
      */
     @Query("""
-           SELECT m FROM Medicamento m
-           WHERE (:nombre IS NULL OR UPPER(m.nombre) LIKE CONCAT('%', UPPER(:nombre), '%'))
+           SELECT m
+           FROM Medicamento m
+           WHERE m.activo = 1
+             AND (:nombre IS NULL OR :nombre = '' OR
+                  UPPER(m.nombre) LIKE CONCAT('%', UPPER(:nombre), '%'))
            """)
     Page<Medicamento> buscar(@Param("nombre") String nombre, Pageable pageable);
 }

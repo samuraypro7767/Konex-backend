@@ -30,6 +30,7 @@ public class MedicamentoMapper {
                 .fechaVencimiento(entity.getFechaVencimiento())
                 .cantidadStock(entity.getCantidadStock())
                 .valorUnitario(entity.getValorUnitario())
+                .activo(entity.getActivo())
                 .build();
     }
 }

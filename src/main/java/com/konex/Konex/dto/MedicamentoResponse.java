@@ -17,4 +17,5 @@ public class MedicamentoResponse {
     private LocalDate fechaVencimiento;
     private Long cantidadStock;
     private BigDecimal valorUnitario;
+    private Integer activo;
 }

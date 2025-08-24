@@ -61,19 +61,13 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     @Transactional
     @Override
     public void eliminar(Long id) {
-        if (!medicamentoRepository.existsById(id)) {
-            throw new NotFoundException("Medicamento no encontrado");
-        }
-        medicamentoRepository.deleteById(id);
+        Medicamento med = medicamentoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Medicamento no encontrado"));
+
+        med.setActivo(0);
+        medicamentoRepository.save(med);
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public MedicamentoResponse obtener(Long id) {
-        return medicamentoRepository.findById(id)
-                .map(MedicamentoMapper::toResponse)
-                .orElseThrow(() -> new NotFoundException("Medicamento no encontrado"));
-    }
 
     @Transactional(readOnly = true)
     @Override
@@ -81,26 +75,39 @@ public class MedicamentoServiceImpl implements MedicamentoService {
         return medicamentoRepository.buscar(nombre, pageable).map(MedicamentoMapper::toResponse);
     }
 
+
+    // obtener: no devolver inactivos
+    @Transactional(readOnly = true)
+    @Override
+    public MedicamentoResponse obtener(Long id) {
+        Medicamento med = medicamentoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Medicamento no encontrado"));
+        if (med.getActivo() != 1) throw new NotFoundException("Medicamento no encontrado");
+        return MedicamentoMapper.toResponse(med);
+    }
+
+    // cotizar: bloquear si está inactivo
     @Transactional(readOnly = true)
     @Override
     public CotizacionResponse cotizar(Long medicamentoId, long cantidad) {
         Medicamento m = medicamentoRepository.findById(medicamentoId)
                 .orElseThrow(() -> new NotFoundException("Medicamento no encontrado"));
+        Validators.check(m.getActivo() == 1, "El medicamento está inactivo");
         Validators.check(cantidad > 0, "La cantidad debe ser mayor que cero");
         return CotizacionMapper.toResponse(m, cantidad);
     }
 
+    // descontar: bloquear si está inactivo
     @Transactional
     @Override
     public void descontarStock(Long medicamentoId, long cantidad) {
         Validators.check(cantidad > 0, "La cantidad debe ser mayor que cero");
-
         Medicamento m = medicamentoRepository.findById(medicamentoId)
                 .orElseThrow(() -> new NotFoundException("Medicamento no encontrado"));
-
+        Validators.check(m.getActivo() == 1, "El medicamento está inactivo");
         Validators.check(m.getCantidadStock() >= cantidad, "Stock insuficiente para la venta");
-
         m.setCantidadStock(m.getCantidadStock() - cantidad);
         medicamentoRepository.save(m);
     }
+
 }
