@@ -1,6 +1,6 @@
 package com.konex.Konex.service.impl;
 
-
+import org.springframework.data.domain.Pageable; // ✅
 import com.konex.Konex.dto.VentaCreateRequest;
 import com.konex.Konex.dto.VentaResponse;
 import com.konex.Konex.exception.BusinessException;
@@ -15,6 +15,7 @@ import com.konex.Konex.service.VentaService;
 import com.konex.Konex.utils.DateRange;
 import com.konex.Konex.utils.Validators;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,14 +86,11 @@ public class VentaServiceImpl implements VentaService {
     }
 
     @Transactional(readOnly = true)
-    @Override
-    public List<VentaResponse> listarPorRango(LocalDate desde, LocalDate hasta) {
-        Validators.check(desde != null && hasta != null, "Debe indicar fechas 'desde' y 'hasta'");
-        Validators.check(!desde.isAfter(hasta), "'desde' no puede ser posterior a 'hasta'");
-
-        DateRange range = DateRange.ofLocalDates(desde, hasta);
-        return ventaRepository.findByFechaHoraBetween(range.desde(), range.hasta()).stream()
-                .map(VentaMapper::toResponse)
-                .toList();
+    public Page<VentaResponse> listarPorRango(LocalDate desde, LocalDate hasta, Pageable pageable) {
+        var start = desde.atStartOfDay();
+        var end   = hasta.plusDays(1).atStartOfDay().minusNanos(1);
+        return ventaRepository.findByFechaHoraBetween(start, end, pageable)
+                .map(VentaMapper::toResponse);
     }
+
 }

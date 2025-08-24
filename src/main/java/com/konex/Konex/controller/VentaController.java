@@ -5,6 +5,8 @@ import com.konex.Konex.dto.VentaResponse;
 import com.konex.Konex.service.VentaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,11 +39,14 @@ public class VentaController {
         return service.obtenerVenta(id);
     }
 
-    // Listar ventas por rango de fechas (YYYY-MM-DD)
     @GetMapping
-    public List<VentaResponse> listarPorRango(
+    public Page<VentaResponse> listarPorRango(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return service.listarPorRango(desde, hasta);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return service.listarPorRango(desde, hasta, PageRequest.of(page, size));
     }
+
 }

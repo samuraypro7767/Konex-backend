@@ -45,6 +45,7 @@ public class Medicamento {
     @Column(name = "VALOR_UNITARIO", nullable = false, precision = 14, scale = 2)
     private BigDecimal valorUnitario;
 
+    @Builder.Default
     @Column(name = "ACTIVO", nullable = false)
     private Integer activo = 1;
 }

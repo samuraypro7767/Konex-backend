@@ -1,5 +1,4 @@
 package com.konex.Konex.service;
-
 import com.konex.Konex.dto.VentaCreateRequest;
 import com.konex.Konex.dto.VentaResponse;
 import com.konex.Konex.exception.BusinessException;
@@ -11,6 +10,7 @@ import com.konex.Konex.repository.VentaRepository;
 import com.konex.Konex.service.impl.VentaServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class VentaServiceImplTest {
@@ -36,14 +37,14 @@ class VentaServiceImplTest {
 
     @Test
     void crearVenta_ok() {
-        // arrange
+        // Arrange
         Medicamento med = Medicamento.builder()
                 .id(1L).nombre("Ibu")
                 .cantidadStock(10L)
                 .valorUnitario(new BigDecimal("1000"))
                 .build();
-        when(medicamentoRepository.findById(1L)).thenReturn(Optional.of(med));
 
+        when(medicamentoRepository.findById(1L)).thenReturn(Optional.of(med));
         when(ventaRepository.save(any(Venta.class))).thenAnswer(inv -> {
             Venta v = inv.getArgument(0);
             v.setId(100L);
@@ -54,10 +55,10 @@ class VentaServiceImplTest {
         req.setMedicamentoId(1L);
         req.setCantidad(3L);
 
-        // act
+        // Act
         VentaResponse resp = service.crearVenta(req);
 
-        // assert
+        // Assert
         assertThat(resp.getId()).isEqualTo(100L);
         assertThat(resp.getValorTotal()).isEqualByComparingTo("3000");
         assertThat(resp.getItems()).hasSize(1);
@@ -65,6 +66,17 @@ class VentaServiceImplTest {
 
         verify(ventaRepository, times(1)).save(any(Venta.class));
         verify(medicamentoRepository, times(1)).save(med);
+    }
+
+    @Test
+    void crearVenta_cantidadInvalida() {
+        VentaCreateRequest req = new VentaCreateRequest();
+        req.setMedicamentoId(1L);
+        req.setCantidad(0L); // inválida
+
+        assertThatThrownBy(() -> service.crearVenta(req))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("mayor que cero");
     }
 
     @Test
@@ -88,6 +100,7 @@ class VentaServiceImplTest {
     @Test
     void crearVenta_medicamentoNoExiste() {
         when(medicamentoRepository.findById(99L)).thenReturn(Optional.empty());
+
         VentaCreateRequest req = new VentaCreateRequest();
         req.setMedicamentoId(99L);
         req.setCantidad(1L);
@@ -98,18 +111,27 @@ class VentaServiceImplTest {
     }
 
     @Test
-    void listarPorRango_ok() {
+    void listarPorRango_paginado_ok() {
+        // Arrange
         Venta v = new Venta();
         v.setId(1L);
         v.setFechaHora(LocalDateTime.now());
         v.setValorTotal(new BigDecimal("123"));
 
-        when(ventaRepository.findByFechaHoraBetween(any(), any()))
-                .thenReturn(List.of(v));
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("fechaHora").descending());
+        Page<Venta> page = new PageImpl<>(List.of(v), pageable, 1);
 
-        List<VentaResponse> list = service.listarPorRango(LocalDate.now().minusDays(1), LocalDate.now());
-        assertThat(list).hasSize(1);
-        assertThat(list.get(0).getId()).isEqualTo(1L);
+        when(ventaRepository.findByFechaHoraBetween(any(), any(), any(Pageable.class)))
+                .thenReturn(page);
+
+        // Act
+        var result = service.listarPorRango(LocalDate.now().minusDays(1), LocalDate.now(), pageable);
+
+        // Assert
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(1L);
+        verify(ventaRepository).findByFechaHoraBetween(any(), any(), eq(pageable));
     }
 
     @Test
@@ -126,12 +148,27 @@ class VentaServiceImplTest {
 
         when(ventaRepository.findAll()).thenReturn(List.of(v1, v2));
 
-        List<VentaResponse> result = service.listarTodas();
+        var result = service.listarTodas();
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getId()).isEqualTo(1L);
         assertThat(result.get(1).getId()).isEqualTo(2L);
-
         verify(ventaRepository, times(1)).findAll();
+    }
+
+    @Test
+    void obtenerVenta_ok() {
+        Venta v = new Venta();
+        v.setId(5L);
+        v.setFechaHora(LocalDateTime.now());
+        v.setValorTotal(new BigDecimal("555"));
+
+        when(ventaRepository.findById(5L)).thenReturn(Optional.of(v));
+
+        var resp = service.obtenerVenta(5L);
+
+        assertThat(resp.getId()).isEqualTo(5L);
+        assertThat(resp.getValorTotal()).isEqualByComparingTo("555");
+        verify(ventaRepository).findById(5L);
     }
 }
