@@ -23,14 +23,54 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
+/**
+ * Implementación de {@link VentaService} que orquesta el ciclo de vida de una venta.
+ * <p>
+ * Responsabilidades principales:
+ * </p>
+ * <ul>
+ *   <li>Validar la solicitud de creación de venta (cantidad &gt; 0).</li>
+ *   <li>Verificar existencia del medicamento y disponibilidad de stock.</li>
+ *   <li>Descontar inventario de manera atómica dentro de la transacción.</li>
+ *   <li>Construir entidad {@link Venta} y su único {@link DetalleVenta} asociado, calcular totales y persistir.</li>
+ *   <li>Exponer resultados como DTO mediante {@link VentaMapper}.</li>
+ * </ul>
+ *
+ * <p><b>Transaccionalidad:</b></p>
+ * <ul>
+ *   <li>{@link #crearVenta(VentaCreateRequest)}: transacción de escritura.</li>
+ *   <li>{@link #listarTodas()}, {@link #obtenerVenta(Long)} y {@link #listarPorRango(LocalDate, LocalDate, Pageable)}: solo lectura.</li>
+ * </ul>
+ *
+ * <p><b>Concurrencia / Integridad:</b> El descuento de stock se hace con una lectura y escritura simples.
+ * En escenarios de alta concurrencia considera emplear bloqueo pesimista/optimista o una columna
+ * de versión para evitar sobreventa.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class VentaServiceImpl implements VentaService {
 
     private final VentaRepository ventaRepository;
     private final MedicamentoRepository medicamentoRepository;
-
+    /**
+     * Crea una venta para un medicamento y cantidad indicados.
+     * <p>
+     * Flujo:
+     * </p>
+     * <ol>
+     *   <li>Valida que la cantidad sea &gt; 0.</li>
+     *   <li>Obtiene el medicamento; si no existe, lanza {@link NotFoundException}.</li>
+     *   <li>Valida stock suficiente; si no hay, lanza excepción de negocio.</li>
+     *   <li>Descuenta stock y persiste el medicamento.</li>
+     *   <li>Crea la venta con un detalle, calcula el total y la persiste.</li>
+     *   <li>Devuelve la venta mapeada a {@link VentaResponse}.</li>
+     * </ol>
+     *
+     * @param req datos de creación (medicamentoId y cantidad), no {@code null}
+     * @return representación de la venta creada
+     * @throws NotFoundException   si el medicamento no existe
+     * @throws BusinessException   o {@link IllegalArgumentException} si la cantidad es inválida o no hay stock suficiente
+     */
     @Transactional
     @Override
     public VentaResponse crearVenta(VentaCreateRequest req) {
@@ -68,6 +108,11 @@ public class VentaServiceImpl implements VentaService {
         venta = ventaRepository.save(venta);
         return VentaMapper.toResponse(venta);
     }
+    /**
+     * Lista todas las ventas sin paginación.
+     *
+     * @return lista completa de ventas mapeadas a {@link VentaResponse}
+     */
     @Transactional(readOnly = true)
     @Override
     public List<VentaResponse> listarTodas() {
@@ -76,7 +121,13 @@ public class VentaServiceImpl implements VentaService {
                 .toList();
     }
 
-
+    /**
+     * Obtiene una venta por su identificador.
+     *
+     * @param id identificador de la venta, no {@code null}
+     * @return la venta encontrada mapeada a {@link VentaResponse}
+     * @throws NotFoundException si no existe una venta con el id indicado
+     */
     @Transactional(readOnly = true)
     @Override
     public VentaResponse obtenerVenta(Long id) {
@@ -84,7 +135,24 @@ public class VentaServiceImpl implements VentaService {
                 .orElseThrow(() -> new NotFoundException("Venta no encontrada"));
         return VentaMapper.toResponse(venta);
     }
-
+    /**
+     * Lista ventas dentro de un rango de fechas por día calendario, de forma paginada.
+     * <p>
+     * Convención utilizada para el rango: {@code [desde 00:00:00, hasta 23:59:59.999999999]}.
+     * Internamente se transforma a:
+     * <pre>
+     * start = desde.atStartOfDay()
+     * end   = hasta.plusDays(1).atStartOfDay().minusNanos(1)
+     * </pre>
+     * y se delega a {@code findByFechaHoraBetween(start, end, pageable)}.
+     * </p>
+     *
+     * @param desde    día inicial (inclusive), no {@code null}
+     * @param hasta    día final (inclusive), no {@code null} y ≥ {@code desde}
+     * @param pageable información de paginación y orden
+     * @return página de ventas en el rango mapeadas a {@link VentaResponse}
+     * @throws IllegalArgumentException si {@code hasta} es anterior a {@code desde} (validación recomendada en capa superior)
+     */
     @Transactional(readOnly = true)
     public Page<VentaResponse> listarPorRango(LocalDate desde, LocalDate hasta, Pageable pageable) {
         var start = desde.atStartOfDay();

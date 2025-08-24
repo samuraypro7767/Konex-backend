@@ -1,0 +1,333 @@
+{
+  "info": {
+    "name": "Konex API",
+    "_postman_id": "a2a9e1f1-0000-4000-8000-000000konex",
+    "description": "Colección de endpoints para la API Konex.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Medicamentos",
+      "item": [
+        {
+          "name": "POST /api/medicamentos (crear)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ibuprofeno 400mg\",\n  \"laboratorioId\": 1,\n  \"fechaFabricacion\": \"2025-01-10\",\n  \"fechaVencimiento\": \"2027-01-10\",\n  \"cantidadStock\": 500,\n  \"valorUnitario\": 1200.5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT /api/medicamentos/{id} (actualizar)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ibuprofeno 600mg\",\n  \"laboratorioId\": 1,\n  \"fechaFabricacion\": \"2025-01-10\",\n  \"fechaVencimiento\": \"2028-01-10\",\n  \"cantidadStock\": 700,\n  \"valorUnitario\": 1500.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/medicamentos/{id} (eliminar lógico)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/medicamentos/{id} (obtener)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/medicamentos/{id}/inactivar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos/1/inactivar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos",
+                "1",
+                "inactivar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/medicamentos (listar paginado + filtro)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos?nombre=ibu&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos"
+              ],
+              "query": [
+                {
+                  "key": "nombre",
+                  "value": "ibu"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/medicamentos/{id}/cotizar?cantidad=#",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos/1/cotizar?cantidad=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos",
+                "1",
+                "cotizar"
+              ],
+              "query": [
+                {
+                  "key": "cantidad",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/medicamentos/{id}/descontar?cantidad=#",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicamentos/1/descontar?cantidad=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicamentos",
+                "1",
+                "descontar"
+              ],
+              "query": [
+                {
+                  "key": "cantidad",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ventas",
+      "item": [
+        {
+          "name": "POST /api/ventas (crear)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medicamentoId\": 1,\n  \"cantidad\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/ventas/all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/ventas/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/ventas?desde&hasta&page&size",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas?desde=2025-01-01&hasta=2025-01-31&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2025-01-31"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

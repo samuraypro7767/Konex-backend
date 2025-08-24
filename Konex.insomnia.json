@@ -1,0 +1,205 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-08-24T19:08:35.163474Z",
+  "__export_source": "konex.generator:1.0",
+  "resources": [
+    {
+      "_id": "wrk_konex_api",
+      "_type": "workspace",
+      "name": "Konex API",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_konex_api",
+      "name": "Base Env",
+      "data": {
+        "baseUrl": "http://localhost:8080"
+      },
+      "dataPropertyOrder": null,
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 0
+    },
+    {
+      "_id": "fld_health",
+      "_type": "request_group",
+      "parentId": "wrk_konex_api",
+      "name": "Health"
+    },
+    {
+      "_id": "fld_med",
+      "_type": "request_group",
+      "parentId": "wrk_konex_api",
+      "name": "Medicamentos"
+    },
+    {
+      "_id": "fld_ventas",
+      "_type": "request_group",
+      "parentId": "wrk_konex_api",
+      "name": "Ventas"
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "fld_health",
+      "name": "GET /health",
+      "method": "GET",
+      "url": "{{ baseUrl }}/health"
+    },
+    {
+      "_id": "req_med_post",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "POST /api/medicamentos",
+      "method": "POST",
+      "url": "{{ baseUrl }}/api/medicamentos",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Ibuprofeno 400mg\",\n  \"laboratorioId\": 1,\n  \"fechaFabricacion\": \"2025-01-10\",\n  \"fechaVencimiento\": \"2027-01-10\",\n  \"cantidadStock\": 500,\n  \"valorUnitario\": 1200.5\n}"
+      }
+    },
+    {
+      "_id": "req_med_put",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "PUT /api/medicamentos/{id}",
+      "method": "PUT",
+      "url": "{{ baseUrl }}/api/medicamentos/1",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nombre\": \"Ibuprofeno 600mg\",\n  \"laboratorioId\": 1,\n  \"fechaFabricacion\": \"2025-01-10\",\n  \"fechaVencimiento\": \"2028-01-10\",\n  \"cantidadStock\": 700,\n  \"valorUnitario\": 1500.0\n}"
+      }
+    },
+    {
+      "_id": "req_med_delete",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "DELETE /api/medicamentos/{id}",
+      "method": "DELETE",
+      "url": "{{ baseUrl }}/api/medicamentos/1"
+    },
+    {
+      "_id": "req_med_get",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "GET /api/medicamentos/{id}",
+      "method": "GET",
+      "url": "{{ baseUrl }}/api/medicamentos/1"
+    },
+    {
+      "_id": "req_med_inactivar",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "PATCH /api/medicamentos/{id}/inactivar",
+      "method": "PATCH",
+      "url": "{{ baseUrl }}/api/medicamentos/1/inactivar"
+    },
+    {
+      "_id": "req_med_listar",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "GET /api/medicamentos?nombre=&page=&size=",
+      "method": "GET",
+      "url": "{{ baseUrl }}/api/medicamentos",
+      "parameters": [
+        {
+          "name": "nombre",
+          "value": "ibu"
+        },
+        {
+          "name": "page",
+          "value": "0"
+        },
+        {
+          "name": "size",
+          "value": "10"
+        }
+      ]
+    },
+    {
+      "_id": "req_med_cotizar",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "GET /api/medicamentos/{id}/cotizar?cantidad=#",
+      "method": "GET",
+      "url": "{{ baseUrl }}/api/medicamentos/1/cotizar",
+      "parameters": [
+        {
+          "name": "cantidad",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "_id": "req_med_descontar",
+      "_type": "request",
+      "parentId": "fld_med",
+      "name": "PATCH /api/medicamentos/{id}/descontar?cantidad=#",
+      "method": "PATCH",
+      "url": "{{ baseUrl }}/api/medicamentos/1/descontar",
+      "parameters": [
+        {
+          "name": "cantidad",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "_id": "req_venta_post",
+      "_type": "request",
+      "parentId": "fld_ventas",
+      "name": "POST /api/ventas",
+      "method": "POST",
+      "url": "{{ baseUrl }}/api/ventas",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"medicamentoId\": 1,\n  \"cantidad\": 3\n}"
+      }
+    },
+    {
+      "_id": "req_venta_all",
+      "_type": "request",
+      "parentId": "fld_ventas",
+      "name": "GET /api/ventas/all",
+      "method": "GET",
+      "url": "{{ baseUrl }}/api/ventas/all"
+    },
+    {
+      "_id": "req_venta_get",
+      "_type": "request",
+      "parentId": "fld_ventas",
+      "name": "GET /api/ventas/{id}",
+      "method": "GET",
+      "url": "{{ baseUrl }}/api/ventas/1"
+    },
+    {
+      "_id": "req_venta_range",
+      "_type": "request",
+      "parentId": "fld_ventas",
+      "name": "GET /api/ventas?desde&hasta&page&size",
+      "method": "GET",
+      "url": "{{ baseUrl }}/api/ventas",
+      "parameters": [
+        {
+          "name": "desde",
+          "value": "2025-01-01"
+        },
+        {
+          "name": "hasta",
+          "value": "2025-01-31"
+        },
+        {
+          "name": "page",
+          "value": "0"
+        },
+        {
+          "name": "size",
+          "value": "10"
+        }
+      ]
+    }
+  ]
+}
