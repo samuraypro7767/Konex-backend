@@ -135,25 +135,20 @@ class VentaServiceImplTest {
     }
 
     @Test
-    void listarTodas_ok() {
-        Venta v1 = new Venta();
-        v1.setId(1L);
-        v1.setFechaHora(LocalDateTime.now());
-        v1.setValorTotal(new BigDecimal("1000"));
+    void listarTodas_paginado_ok_service() {
+        Venta v1 = new Venta(); v1.setId(1L);
+        Venta v2 = new Venta(); v2.setId(2L);
 
-        Venta v2 = new Venta();
-        v2.setId(2L);
-        v2.setFechaHora(LocalDateTime.now());
-        v2.setValorTotal(new BigDecimal("2000"));
+        var pageable = PageRequest.of(0, 2);
+        Page<Venta> page = new PageImpl<>(List.of(v1, v2), pageable, 10);
 
-        when(ventaRepository.findAll()).thenReturn(List.of(v1, v2));
+        when(ventaRepository.findAll(any(Pageable.class))).thenReturn(page); // ← clave
 
-        var result = service.listarTodas();
+        Page<VentaResponse> result = service.listarTodas(pageable);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(1L);
-        assertThat(result.get(1).getId()).isEqualTo(2L);
-        verify(ventaRepository, times(1)).findAll();
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(1L);
+        verify(ventaRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test

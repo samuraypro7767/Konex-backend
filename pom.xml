@@ -128,9 +128,13 @@
 						<configuration>
 							<!-- Estas exclusiones SOLO afectan lo que se ve en el HTML -->
 							<excludes>
-								<exclude>**/dto/**</exclude>
-								<exclude>**/config/**</exclude>
-								<exclude>**/*Application*</exclude>
+								<exclude>com/konex/Konex/model/**</exclude>
+								<exclude>com/konex/Konex/exception/**</exclude>
+								<exclude>com/konex/Konex/config/**</exclude>
+								<exclude>com/konex/Konex/*Application*</exclude>
+								<exclude>com/konex/Konex/mapper/**</exclude>
+								<exclude>com/konex/Konex/utils/**</exclude>
+								<exclude>com/konex/Konex/dto/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>
@@ -161,12 +165,12 @@
 									</limits>
 									<!-- Estas exclusiones SÍ afectan el cálculo del gate -->
 									<excludes>
-										<exclude>**/model/**</exclude>
-										<exclude>**/exception/**</exclude>
-										<exclude>**/config/**</exclude>
-										<exclude>**/*Application*</exclude>
-										<exclude>**/mapper/**</exclude>
-										<exclude>**/utils/**</exclude>
+										<exclude>com/konex/Konex/model/**</exclude>
+										<exclude>com/konex/Konex/exception/**</exclude>
+										<exclude>com/konex/Konex/config/**</exclude>
+										<exclude>com/konex/Konex/*Application*</exclude>
+										<exclude>com/konex/Konex/mapper/**</exclude>
+										<exclude>com/konex/Konex/utils/**</exclude>
 									</excludes>
 								</rule>
 

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -121,15 +122,26 @@ class VentaControllerTest {
     }
 
     @Test
-    void listarTodas_ok() throws Exception {
+    void listarTodas_paginado_ok() throws Exception {
         VentaResponse r1 = VentaResponse.builder().id(1L).valorTotal(new BigDecimal("1000")).build();
         VentaResponse r2 = VentaResponse.builder().id(2L).valorTotal(new BigDecimal("2000")).build();
 
-        Mockito.when(service.listarTodas()).thenReturn(List.of(r1, r2));
+        var pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "fecha"));
+        var page = new PageImpl<>(List.of(r1, r2), pageable, 5);
 
-        mvc.perform(get("/api/ventas/all"))
+        Mockito.when(service.listarTodas(any())).thenReturn(page);
+
+        mvc.perform(get("/api/ventas?page=0&size=2&sort=fecha,desc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[1].id").value(2));
+                // contenido
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[1].id").value(2))
+                // metadatos de paginación
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalElements").value(5))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(false));
     }
 }

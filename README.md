@@ -1,23 +1,21 @@
+¡hecho! te dejo el README con una sección nueva de **Docker (Oracle Free)** que incluye exactamente los comandos que pasaste (en formato multilinea para Windows `cmd/PowerShell` y en una sola línea), más notas rápidas para conectar la app:
+
+---
 
 # Konex – Inventario y Ventas de Medicamentos
 
-API REST para gestionar medicamentos, inventario, cotizaciones y ventas.  
+API REST para gestionar medicamentos, inventario, cotizaciones y ventas.
 Incluye validaciones, manejo global de errores, migraciones con Flyway, documentación OpenAPI (Swagger) y verificación de cobertura con JaCoCo.
-
----
 
 ## Tech Stack
 
-- **Java**: 17 (enforced por maven-enforcer)
-- **Spring Boot**: 3.5.5
-  - Web, Data JPA, Validation
-- **DB**: Oracle (ojdbc11 23.3.0.23.09)
-- **Migrations**: Flyway 11.11.2 (+ oracle plugin)
-- **OpenAPI/Swagger**: springdoc-openapi 2.6.0
-- **Lombok**: 1.18.34
-- **Testing**: Spring Boot Test, Mockito Inline; **JaCoCo 0.8.12** con quality gate
-
----
+* **Java**: 17 (enforced por maven-enforcer)
+* **Spring Boot**: 3.5.5 (Web, Data JPA, Validation)
+* **DB**: Oracle (ojdbc11 23.3.0.23.09)
+* **Migrations**: Flyway 11.11.2 (+ oracle plugin)
+* **OpenAPI/Swagger**: springdoc-openapi 2.6.0
+* **Lombok**: 1.18.34
+* **Testing**: Spring Boot Test, Mockito Inline; **JaCoCo 0.8.12** con quality gate
 
 ## Estructura del proyecto
 
@@ -31,8 +29,6 @@ mapper/                     -> Entity <-> DTO
 exception/                  -> NotFoundException, BusinessException, GlobalExceptionHandler
 utils/                      -> Validators, DateRange
 ```
-
----
 
 ## Configuración (`application.properties` de ejemplo)
 
@@ -70,126 +66,158 @@ spring.flyway.baseline-on-migrate=true
 spring.flyway.baseline-version=1
 ```
 
-> **Nota Oracle**: si usas Oracle XE por defecto, el service name suele ser `XEPDB1` en lugar de `FREEPDB1`.
+> **Nota Oracle**: en **Oracle Free 23c** el *service name* es `FREEPDB1`. En **Oracle XE** suele ser `XEPDB1`.
 
----
+### Configuración (bloque alternativo copiable)
+
+```properties
+spring.application.name=Konex
+
+# --- Oracle ---
+spring.datasource.url=jdbc:oracle:thin:@//localhost:1521/FREEPDB1
+spring.datasource.username=KONEX
+spring.datasource.password=Konex\#2025
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+
+# Hikari
+spring.datasource.hikari.maximum-pool-size=10
+spring.datasource.hikari.minimum-idle=2
+spring.datasource.hikari.connection-timeout=30000
+spring.datasource.hikari.idle-timeout=30000
+
+# --- JPA/Hibernate ---
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+spring.jpa.open-in-view=false
+
+# --- Server ---
+server.port=8080
+
+# --- Flyway ---
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+spring.flyway.default-schema=KONEX
+spring.flyway.schemas=KONEX
+spring.flyway.baseline-on-migrate=true
+spring.flyway.baseline-version=1
+```
+
+## Docker (Oracle Free)
+
+### 1) Descargar imagen
+
+```bash
+docker pull gvenzl/oracle-free:latest
+```
+
+### 2) Levantar contenedor
+
+**Windows (cmd/PowerShell, multilinea con `^`):**
+
+```bash
+docker run -d --name oracle-free ^
+  -p 1521:1521 -p 5500:5500 ^
+  -e ORACLE_PASSWORD="Konex#2025" ^
+  -e APP_USER=KONEX ^
+  -e APP_USER_PASSWORD="Konex#2025" ^
+  gvenzl/oracle-free:latest
+```
+
+**Una sola línea (cualquier OS):**
+
+```bash
+docker run -d --name oracle-free -p 1521:1521 -p 5500:5500 -e ORACLE_PASSWORD="Konex#2025" -e APP_USER=KONEX -e APP_USER_PASSWORD="Konex#2025" gvenzl/oracle-free:latest
+```
+
+**Notas rápidas:**
+
+* Crea el usuario de app **KONEX** con la clave dada.
+* Puertos:
+
+  * `1521`: Listener Oracle
+  * `5500`: Enterprise Manager Express
+* **JDBC URL** a usar en la app (coincide con el `application.properties`):
+
+  ```
+  jdbc:oracle:thin:@//localhost:1521/FREEPDB1
+  ```
+* **Credenciales app**: `username=KONEX`, `password=Konex#2025`.
+* En el primer arranque puede tardar unos minutos en inicializar.
+
+> Si quieres persistencia entre reinicios, agrega un volumen:
+>
+> ```bash
+> -v oracle_free_data:/opt/oracle/oradata
+> ```
 
 ## Migraciones Flyway
 
-Ubica los scripts en `src/main/resources/db/migration/`:
+Coloca scripts en `src/main/resources/db/migration/`:
 
-- `V1__init.sql`
-- `V2__seed_data.sql`
+* `V1__init.sql`
+* `V2__seed_data.sql`
 
-> **Oracle**: las entidades usan `GenerationType.IDENTITY`. Asegura versión 12c+ o cambia a secuencias.
-
----
+*(En Oracle 12c+ puedes usar `IDENTITY`; si no, cambia a secuencias.)*
 
 ## Build, ejecución y cobertura
 
 ```bash
-# Compilar + tests + cobertura + quality gate
-mvn clean verify
+mvn clean verify          # tests + JaCoCo + quality gate
+mvn spring-boot:run       # dev
+mvn clean package && java -jar target/Konex-0.0.1-SNAPSHOT.jar
 
-# Ejecutar en dev
-mvn spring-boot:run
-
-# Empaquetar y ejecutar JAR
-mvn clean package
-java -jar target/Konex-0.0.1-SNAPSHOT.jar
-
-# Reporte HTML de cobertura
+# Reporte cobertura
 open target/site/jacoco/index.html
 ```
 
-### JaCoCo Quality Gate (resumen del POM)
+### JaCoCo Quality Gate (resumen)
 
-- Gate global mínimo:
-  - LINE COVEREDRATIO ≥ **0.60**
-  - BRANCH COVEREDRATIO ≥ **0.45**
-- Excluidos del gate: `model`, `exception`, `config`, `*Application*`, `mapper`, `utils`
-- Reporte HTML excluye además `dto/**`
-
----
+* **Global**: LINE ≥ 0.60, BRANCH ≥ 0.45
+* Excluidos del gate: `model`, `exception`, `config`, `*Application*`, `mapper`, `utils`
+* Reporte HTML excluye además `dto/**`
 
 ## Endpoints principales
 
-### Health
-- **GET** `/health` → `"OK"`
+**Health**
 
-### Medicamentos (base: `/api/medicamentos`)
-- **POST** `/api/medicamentos` — crear
-- **PUT** `/api/medicamentos/{id}` — actualizar
-- **DELETE** `/api/medicamentos/{id}` — eliminar lógico (`activo = 0`)
-- **GET** `/api/medicamentos/{id}` — obtener por id (solo activos)
-- **PATCH** `/api/medicamentos/{id}/inactivar` — inactivar (alias de eliminar lógico)
-- **GET** `/api/medicamentos` — listar paginado + filtro `nombre`
-  - Query: `?nombre=&page=&size=`
-- **GET** `/api/medicamentos/{id}/cotizar?cantidad=#` — cotización (no altera stock)
-- **PATCH** `/api/medicamentos/{id}/descontar?cantidad=#` — descuenta stock
+* `GET /health` → `"OK"`
 
-**Payload ejemplo (POST/PUT `/api/medicamentos`):**
-```json
-{
-  "nombre": "Ibuprofeno 400mg",
-  "laboratorioId": 1,
-  "fechaFabricacion": "2025-01-10",
-  "fechaVencimiento": "2027-01-10",
-  "cantidadStock": 500,
-  "valorUnitario": 1200.50
-}
-```
+**Medicamentos** (`/api/medicamentos`)
 
-### Ventas (base: `/api/ventas`)
-- **POST** `/api/ventas` — confirmar venta  
-  **Body:**
-  ```json
-  { "medicamentoId": 1, "cantidad": 3 }
-  ```
-- **GET** `/api/ventas/all` — listar todas sin paginar
-- **GET** `/api/ventas/{id}` — detalle por id
-- **GET** `/api/ventas?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&page=&size=` — listar por rango (paginado)
-  - El servicio expande a `[desde 00:00:00, hasta 23:59:59.999999999]`.
+* CRUD + listar paginado + cotizar + descontar stock
+* Ver payload de ejemplo en el bloque original
 
----
+**Ventas** (`/api/ventas`)
 
-## Manejo global de errores
+* `POST /api/ventas` (confirmar venta)
+* `GET /api/ventas/all`
+* `GET /api/ventas/{id}`
+* `GET /api/ventas?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&page=&size=`
 
-`GlobalExceptionHandler` mapea:
-- `NotFoundException` → **404**
-- `BusinessException` → **400**
-- `MethodArgumentNotValidException` → **400** (primer error de campo)
-- Cualquier otra excepción → **500** con `details`
+## Errores globales
 
-**Estructura de error:**
+Manejados por `GlobalExceptionHandler` con estructura:
+
 ```json
 { "error": "Mensaje", "status": 400, "details": "Solo en 500" }
 ```
 
----
-
 ## CORS / Seguridad
 
-- `@CrossOrigin("*")` en controladores (útil en desarrollo).  
-  Restringir en producción a dominios confiables.
-- Considera control de versiones (`@Version`) o bloqueos si hay alta concurrencia en stock.
-
----
+`@CrossOrigin("*")` en dev; restringir en prod. Considera `@Version` si hay alta concurrencia.
 
 ## Swagger / OpenAPI
 
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
----
+* UI: `http://localhost:8080/swagger-ui/index.html`
+* JSON: `http://localhost:8080/v3/api-docs`
 
 ## Colecciones de API
 
-En este repo encontrarás:
-- **Konex.postman_collection.json** — importable en Postman
-- **Konex.insomnia.json** — export de workspace para Insomnia
-
-Cada colección usa la variable `{{baseUrl}}` (por defecto `http://localhost:8080`).
+* `Konex.postman_collection.json`
+* `Konex.insomnia.json`
+  (Usan `{{baseUrl}}`, por defecto `http://localhost:8080`)
 
 ---
 

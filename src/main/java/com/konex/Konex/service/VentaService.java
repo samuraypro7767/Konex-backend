@@ -64,10 +64,9 @@ public interface VentaService {
      */
     Page<VentaResponse> listarPorRango(LocalDate desde, LocalDate hasta, Pageable pageable);
     /**
-     * Lista todas las ventas sin paginación.
+     * Lista todas las ventas  paginación.
      *
      * @return lista completa de ventas
      */
-    List<VentaResponse> listarTodas();
-
+    Page<VentaResponse> listarTodas(Pageable pageable);
 }

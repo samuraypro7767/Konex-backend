@@ -109,16 +109,15 @@ public class VentaServiceImpl implements VentaService {
         return VentaMapper.toResponse(venta);
     }
     /**
-     * Lista todas las ventas sin paginación.
+     * Lista todas las ventas  paginación.
      *
      * @return lista completa de ventas mapeadas a {@link VentaResponse}
      */
     @Transactional(readOnly = true)
     @Override
-    public List<VentaResponse> listarTodas() {
-        return ventaRepository.findAll().stream()
-                .map(VentaMapper::toResponse)
-                .toList();
+    public Page<VentaResponse> listarTodas(Pageable pageable) {
+        return ventaRepository.findAll(pageable)
+                .map(VentaMapper::toResponse);
     }
 
     /**

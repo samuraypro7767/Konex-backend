@@ -1,12 +1,12 @@
 package com.konex.Konex.controller;
-
+import org.springframework.data.domain.*;
 import com.konex.Konex.dto.VentaCreateRequest;
 import com.konex.Konex.dto.VentaResponse;
 import com.konex.Konex.service.VentaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,8 +50,11 @@ public class VentaController {
      * @return lista completa de ventas
      */
     @GetMapping("/all")
-    public List<VentaResponse> listarTodas() {
-        return service.listarTodas();
+    public Page<VentaResponse> listarTodas(
+            @PageableDefault(size = 20, sort = "fecha", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        return service.listarTodas(pageable);
     }
 
 
