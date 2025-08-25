@@ -221,4 +221,4 @@ Manejados por `GlobalExceptionHandler` con estructura:
 
 ---
 
-© Konex. Ajusta licencia/autores según corresponda.
+
